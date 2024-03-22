@@ -71,12 +71,22 @@ export async function createInvoice(prevState: State, formData: FormData) {
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
-export default async function updateInvoice(id: string, formData: FormData) {
-  const { customerId, amount, status } = UpdateInvoice.parse({
+export default async function updateInvoice(prevState: State, formData: FormData) {
+  const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
+    id: formData.get("id"),
   });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten(),
+      message: 'Missing Fields. Failed to Update Invoice.',
+    };
+  }
+
+  const { customerId, amount, status } = validatedFields.data;
 
   try {
     await sql`
@@ -92,7 +102,6 @@ export default async function updateInvoice(id: string, formData: FormData) {
 }
 
 export async function deleteInvoice(id: string) {
-  throw new Error('Not implemented');
   try {
     await sql`
       DELETE FROM invoices
