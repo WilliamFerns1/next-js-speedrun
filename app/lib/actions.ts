@@ -7,35 +7,64 @@ import { redirect } from 'next/navigation';
 
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(),
-  status: z.enum(['paid', 'pending']),
+  customerId: z.string({
+    invalid_type_error: 'Please select a customer',
+  }),
+  amount: z.coerce
+    .number()
+    .gt(0, { message: 'Please enter an amount greater than $0.' }),
+  status: z.enum(['paid', 'pending'], {
+    invalid_type_error: 'Please select an invoice status',
+  }),
   date: z.string(),
 });
 
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
-  const { customerId, amount, status } = CreateInvoice.parse({
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+
+export async function createInvoice(prevState: State, formData: FormData) {
+  // Validate form using zod
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+
+  // If form validation is not usccessful, return errors early on. Else, continue
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten(),
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+
+  // Getting data ready for database
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0];
+
   try {
+    // Send data to database
     await sql`
       INSERT INTO invoices (customer_id, amount, status, date)
       VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
     `;
-  }
-  catch (e) {
+  } catch (e) {
+    // Return error if database fails
     return {
-      message: 'Failed to create invoice',
-    }
+      message: 'Database Erorr: Failed to create invoice',
+    };
   }
   console.log('Changed invoice');
-
+  // Revalidate the path to update the cache
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
@@ -58,7 +87,7 @@ export default async function updateInvoice(id: string, formData: FormData) {
   } catch (e) {
     return {
       message: 'Failed to update invoice',
-    }
+    };
   }
 }
 
@@ -72,7 +101,7 @@ export async function deleteInvoice(id: string) {
   } catch (e) {
     return {
       message: 'Failed to delete invoice',
-    }
+    };
   }
 
   revalidatePath('/dashboard/invoices');
