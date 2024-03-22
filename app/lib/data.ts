@@ -1,5 +1,5 @@
 import { sql } from '@vercel/postgres';
-import { unstable_noStore as noStore} from "next/cache";
+import { unstable_noStore as noStore } from 'next/cache';
 import {
   CustomerField,
   CustomersTableType,
@@ -56,7 +56,7 @@ export async function fetchLatestInvoices() {
 }
 
 export async function fetchCardData() {
-  noStore()
+  noStore();
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
@@ -96,7 +96,6 @@ export async function fetchFilteredInvoices(
   query: string,
   currentPage: number,
 ) {
-
   noStore();
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 

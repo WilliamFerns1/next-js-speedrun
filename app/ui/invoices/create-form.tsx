@@ -95,7 +95,6 @@ export default function Form({ customers }: { customers: CustomerField[] }) {
                 </label>
               </div>
             </div>
-            
           </div>
         </fieldset>
       </div>
