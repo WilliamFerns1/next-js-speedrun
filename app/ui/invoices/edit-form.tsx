@@ -51,7 +51,11 @@ export default function EditInvoiceForm({ invoice,
             <UserCircleIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500" />
           </div>
           <div id="customer-error" className="mt-1 text-sm text-red-500">
-
+            {state.errors?.fieldErrors?.customerId && 
+              state.errors.fieldErrors.customerId.map((error) => (
+                <p key={error} className="text-red-500">{error}</p>
+              ))
+            }
           </div>
         </div>
 
@@ -70,9 +74,17 @@ export default function EditInvoiceForm({ invoice,
                 defaultValue={invoice.amount}
                 placeholder="Enter USD amount"
                 className="peer block w-full rounded-md border border-gray-200 py-2 pl-10 text-sm outline-2 placeholder:text-gray-500"
+                aria-describedby="amount-error"
               />
               <CurrencyDollarIcon className="pointer-events-none absolute left-3 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-500 peer-focus:text-gray-900" />
             </div>
+          </div>
+          <div id="amount-error" className="mt-1 text-sm text-red-500">
+            {state.errors?.fieldErrors?.amount && 
+              state.errors.fieldErrors.amount.map((error) => (
+                <p key={error} className="text-red-500">{error}</p>
+              ))
+            }
           </div>
         </div>
 
@@ -91,6 +103,7 @@ export default function EditInvoiceForm({ invoice,
                   value="pending"
                   defaultChecked={invoice.status === 'pending'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="pending"
@@ -107,6 +120,7 @@ export default function EditInvoiceForm({ invoice,
                   value="paid"
                   defaultChecked={invoice.status === 'paid'}
                   className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
+                  aria-describedby="status-error"
                 />
                 <label
                   htmlFor="paid"
@@ -115,6 +129,13 @@ export default function EditInvoiceForm({ invoice,
                   Paid <CheckIcon className="h-4 w-4" />
                 </label>
               </div>
+            </div>
+            <div id="status-error" className="mt-1 text-sm text-red-500">
+              {state.errors?.fieldErrors?.status && 
+                state.errors.fieldErrors.status.map((error) => (
+                  <p key={error} className="text-red-500">{error}</p>
+                ))
+              }
             </div>
           </div>
         </fieldset>
