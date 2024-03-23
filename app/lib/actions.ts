@@ -6,8 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
-import fs from "fs";
-
 
 const FormSchema = z.object({
   id: z.string(),
@@ -141,15 +139,6 @@ export async function authenticate(
           return 'Invalid credentials.';
         default:
           console.error("Error: ", error);
-          // save error to error.log file:
-          fs.appendFile('error.log', error, (err) => {
-            if (err) {
-              console.error(err);
-            } else {
-              console.log('Error logged successfully');
-            }
-          })
-
           return 'Something went wrong.';
       }
     }
