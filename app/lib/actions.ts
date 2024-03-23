@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
- 
+import fs from "fs";
+
 
 const FormSchema = z.object({
   id: z.string(),
@@ -75,8 +76,8 @@ export async function createInvoice(prevState: State, formData: FormData) {
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
 export default async function updateInvoice(
-  id: string, 
-  prevState: State, 
+  id: string,
+  prevState: State,
   formData: FormData
 ) {
   const validatedFields = UpdateInvoice.safeParse({
@@ -121,18 +122,34 @@ export async function deleteInvoice(id: string) {
 
   revalidatePath('/dashboard/invoices');
 }
+
 export async function authenticate(
   prevState: string | undefined,
   formData: FormData,
 ) {
   try {
     await signIn('credentials', formData);
+    // extract the form data 
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+    console.log("Email & Pass", email + "\n" + password)
+
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials.';
         default:
+          console.error("Error: ", error);
+          // save error to error.log file:
+          fs.appendFile('error.log', error, (err) => {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log('Error logged successfully');
+            }
+          })
+
           return 'Something went wrong.';
       }
     }

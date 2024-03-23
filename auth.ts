@@ -26,11 +26,13 @@ export const { auth, signIn, signOut } = NextAuth({
           .safeParse(credentials);
  
         if (parsedCredentials.success) {
+          console.log("Parsing success")
           const { email, password } = parsedCredentials.data;
           const user = await getUser(email);
           if (!user) return null;
+          console.log("User found")
           const passwordsMatch = await bcrypt.compare(password, user.password);
-
+          console.log("after password match")
           if (passwordsMatch) return user;
         }
 
